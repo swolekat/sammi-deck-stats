@@ -3,4 +3,4 @@ Paste in a decks_data.json or a deck that copied and get an idea of what command
 
 Try it out at http://swolekat.github.io/sammi-deck-stats
 
-![Example of what the output looks like](./exmaple-run.png)
+![Example of what the output looks like](http://swolekat.github.io/sammi-deck-stats/exmaple-run.png)
