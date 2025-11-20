@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Trebuchet MS', sans-serif;
+            background: #222;
+            color: #fff;
+        }
+
+        body {
+            padding: 10px;
+        }
+
+        h1 {
+            padding-top: 0;
+            margin-top: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        .controls > * {
+            flex-grow: 1;
+            flex-shrin: 0;
+        }
+
+        #deck-input {
+            height: 600px;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        SAMMI Deck Stats
+    </h1>
+    <div class="controls">
+        <textarea placeholder="Put your json here!" id='deck-input' ></textarea>
+        <div id="stats">
+            Stats here
+        </div>
+    </div>
+    <script>
+        (function(){
+            const textArea = document.getElementById('deck-input');
+            const stats = document.getElementById('stats');
+
+            const commandIdToHumanNameMap = {
+                6: 'Information',
+                137: 'Overtime',
+                66: 'Trigger Pull Data',
+                260: 'OBS Event Pull',
+                136: 'Open URL',
+                169: 'HTTP Request',
+                342: 'HTTP Download File',
+                237: 'URL Encode String',
+                247: 'Get Date/Time',
+                248: 'Date/Time Math',
+                249: 'Date/Time Diff',
+                307: 'Date/Time Duration',
+                228: 'Send UDP Packet',
+                261: 'Deck: Change Status',
+                262: 'Deck: Get Status',
+                313: 'Voice: Toggle Status',
+                7: 'If Statement',
+                142: 'Alert Message',
+                8: 'Re-enable',
+                9: 'Repeat Amount',
+                11: 'Switch Statement',
+                12: 'Exit',
+                24: 'Switch Statement',
+                26: 'Case Statement',
+                153: 'Wait Until Variable Exists',
+                156: 'Wait Until Variable Is',
+                190: 'Wait For Timeout',
+                157: 'Wait For Keyboard Button Status',
+                213: 'Wait for User Choice',
+                214: 'Wait for User Input',
+                15: 'Set Local Variable',
+                335: 'Set Filepath Variable',
+            };
+
+            const triggerIdToHumanNameMap = {
+
+            };
+
+            const combineData = (data1, data2) => {
+                const uniqueCommandNames = [... new Set([...data1.commands.map(c => c.name), ...data2.commands.map(c => c.name)])];
+                const uniqueTriggerNames = [... new Set([...data1.triggers.map(c => c.name), ...data2.triggers.map(c => c.name)])];
+
+                return {
+                    triggers: uniqueTriggerNames.map(name => {
+                        const matchingData1 = data1.triggers.find(c => c.name === name);
+                        const matchingData2 = data2.triggers.find(c => c.name === name);
+                        if(matchingData1 && !matchingData2) {
+                            return matchingData1;
+                        }
+                        if(matchingData2 && !matchingData1) {
+                            return matchingData2;
+                        }
+                        return {
+                            name,
+                            count: matchingData1.count + matchingData2.count,
+                        };
+                    }),
+                    commands: uniqueCommandNames.map(name => {
+                        const matchingData1 = data1.commands.find(c => c.name === name);
+                        const matchingData2 = data2.commands.find(c => c.name === name);
+                        if(matchingData1 && !matchingData2) {
+                            return matchingData1;
+                        }
+                        if(matchingData2 && !matchingData1) {
+                            return matchingData2;
+                        }
+                        return {
+                            name,
+                            count: matchingData1.count + matchingData2.count,
+                        };
+                    })
+                };
+            };
+
+            const parseButton = (button) => {
+                console.log(button);
+                const rawCommands = button.command_list;
+                const rawTriggers = button.triggers;
+
+                let processedCommands = [];
+                rawCommands.forEach(command => {
+                    const {cmd, dis} = command;
+                    const isDisabled = dis !== 0;
+                    if(isDisabled) {
+                        return;
+                    }
+                    const commandName = commandIdToHumanNameMap[cmd];
+                    const matchingProcessed = processedCommands.find(c => c.name === commandName);
+                    if(matchingProcessed) {
+                        matchingProcessed.count += 1;
+                        return;
+                    }
+                    processedCommands.push({
+                        name: commandName,
+                        count: 1,
+                    });
+                });
+
+                return {
+                    triggers: [],
+                    commands: processedCommands,
+                };
+            };
+
+            const parseDeck = (deck) => {
+                const deckData = JSON.parse(deck.deck_data);
+                const buttons = deckData.button_list;
+                const parsedButtons = buttons.map((button) => parseButton(button));
+                const combinedData = parsedButtons.reduce((acc, curr) => {
+                    return combineData(acc, curr)
+                }, {
+                    commands: [],
+                    triggers: [],
+                })
+                console.log(combinedData);
+                return combinedData;
+            };
+
+
+            const generateStats = () => {
+                // try {
+                    const inputData = JSON.parse(textArea.value);
+                    const deckData = parseDeck(inputData);
+
+                    const commandsList =
+
+                    stats.innerHTML = `
+                        <h2>Commands</h2>
+                        <ul>
+                            ${deckData.commands.map(c => `<li>${c.name} - ${c.count}</li>`).join('')}
+                        </ul>
+                        <h2>Triggers</h2>
+                        <ul>
+                            ${deckData.triggers.map(c => `<li>${c.name} - ${c.count}</li>`).join('')}
+                        </ul>
+                    `;
+                // } catch (e) {
+                //     stats.innerHTML = `Error parsing josn ${e.message}`;
+                // }
+            };
+
+            textArea.addEventListener('change', generateStats)
+        }());
+    </script>
+</body>
+</html>
