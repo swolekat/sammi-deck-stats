@@ -4,3 +4,5 @@ Paste in a decks_data.json or a deck that copied and get an idea of what command
 Try it out at http://swolekat.github.io/sammi-deck-stats
 
 ![Example of what the output looks like](./example-run.png "Example Run")
+
+Special thanks to [wolbee](https://bsky.app/profile/wolbee.buzz) for helping me fill in some commands and triggers I was missing.

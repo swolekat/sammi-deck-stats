@@ -7,6 +7,7 @@
         *, *:before, *:after {
             box-sizing: border-box;
         }
+
         html, body {
             margin: 0;
             padding: 0;
@@ -46,513 +47,545 @@
     </style>
 </head>
 <body>
-    <h1>
-        SAMMI Deck Stats
-    </h1>
-    <div class="controls">
-        <textarea placeholder="Put your json here!" id='deck-input' ></textarea>
-        <div id="stats">
-            Stats here
-        </div>
+<h1>
+    SAMMI Deck Stats
+</h1>
+<div class="controls">
+    <textarea placeholder="Put your json here!" id='deck-input'></textarea>
+    <div id="stats">
+        Stats here
     </div>
-    <script>
-        (function(){
-            const textArea = document.getElementById('deck-input');
-            const stats = document.getElementById('stats');
+</div>
+<script>
+    (function () {
+        const textArea = document.getElementById('deck-input');
+        const stats = document.getElementById('stats');
 
-            const commandIdToHumanNameMap = {
-                6: 'Information',
-                137: 'Overtime',
-                66: 'Trigger Pull Data',
-                260: 'OBS Event Pull',
-                136: 'Open URL',
-                169: 'HTTP Request',
-                342: 'HTTP Download File',
-                237: 'URL Encode String',
-                247: 'Get Date/Time',
-                248: 'Date/Time Math',
-                249: 'Date/Time Diff',
-                307: 'Date/Time Duration',
-                228: 'Send UDP Packet',
-                261: 'Deck: Change Status',
-                262: 'Deck: Get Status',
-                313: 'Voice: Toggle Status',
-                7: 'If Statement',
-                142: 'Alert Message',
-                8: 'Re-enable',
-                9: 'Repeat Amount',
-                11: 'Switch Statement',
-                12: 'Exit',
-                24: 'Switch Statement',
-                26: 'Case Statement',
-                153: 'Wait Until Variable Exists',
-                156: 'Wait Until Variable Is',
-                190: 'Wait For Timeout',
-                157: 'Wait For Keyboard Button Status',
-                213: 'Wait for User Choice',
-                214: 'Wait for User Input',
-                15: 'Set Local Variable',
-                335: 'Set Filepath Variable',
-                334: 'Get Button Color',
-                160: 'Set Button Variable',
-                325: 'Get Button Color',
-                326: 'Get Button Text',
-                162: 'Get Button Variable',
-                163: 'Get Global Variable',
-                81: 'Get Variable Type',
-                78: 'Delete Variable',
-                19: 'Variable Transition',
-                82: 'Set Boolean',
-                95: 'Number to String',
-                79: 'String to Number',
-                80: 'Hex String to Number',
-                236: 'Number to Hex String',
-                76: 'Clamp',
-                77: 'Random',
-                170: 'Swap Red & Blue',
-                343: 'Remap',
-                344: 'Lerp',
-                20: 'Set String Variable',
-                147: 'Pull Wildcards',
-                83: 'String Get Length',
-                311: 'String Capitalize',
-                84: 'String Digits Only',
-                85: 'String Letters Only',
-                86: 'String Letters & Digits Only',
-                87: 'String Replace',
-                88: 'String Replace All',
-                89: 'String Upper Case',
-                90: 'String Lower Case',
-                91: 'String Position',
-                92: 'String Count',
-                93: 'String Clamp',
-                253: 'String Trim',
-                94: 'String Remove Section',
-                215: 'String Format',
-                217: 'String Split to Array',
-                318: 'String Substitute Variables',
-                159: 'String Hash',
-                17: 'Create Array',
-                96: 'Array Insert',
-                97: 'Array Remove',
-                98: 'Array Pull',
-                259: 'Array Get Value',
-                99: 'Array Replace',
-                100: 'Array Get Size',
-                101: 'Array Random',
-                102: 'Array Shuffle',
-                103: 'Array Sort',
-                104: 'Array Concat',
-                166: 'Array Find Value',
-                218: 'Array Format to String',
-                234: 'Array Clear',
-                242: 'Array Map',
-                243: 'Array Filter',
-                167: 'Stringify Array',
-                168: 'Parse Array/Object',
-                16: 'Create Object',
-                165: 'Set Object Variable',
-                164: 'Get Object Variable',
-                18: 'Stringify Object Variable',
-                194: 'Object Get Size',
-                195: 'Object Get First Key',
-                196: 'Object Get Next Key',
-                244: 'Object to Array',
-                43: 'Scene Switch',
-                68: 'Change Scene Transition',
-                69: 'Remove Scene Transition',
-                70: 'Set Transition',
-                71: 'Set Transition Duration',
-                72: 'Set Transition Settings',
-                143: 'OBS Pull Source Value',
-                22: 'Source Change Position',
-                30: 'Source Change Visibility',
-                296: 'Source Toggle Visibility',
-                32: 'Source Change Scale',
-                33: 'Source Change Rotation',
-                34: 'Source Change Settings',
-                35: 'Source Change Text(GDI+)',
-                36: 'Source Change Text(FT2)',
-                31: 'Source Change Volume',
-                75: 'Source Change Center Point',
-                144: 'Source Change Cropping',
-                233: 'Source Change Blend Mode',
-                44: 'Source Mute',
-                45: 'Source Toggle Mute',
-                46: 'Change Audio Monitor Type',
-                47: 'Create Source',
-                48: 'Delete Source',
-                49: 'Duplicate Source (OBSws 4.9.1)',
-                232: 'Duplicate Source (OBSws 5)',
-                29: 'Filter Change Visibility',
-                297: 'Filter Toggle Visibility',
-                37: 'Filter Change Settings',
-                51: 'Media Resume/Pause',
-                52: 'Media Restart',
-                53: 'Media Stop',
-                54: 'Media Next',
-                55: 'Media Previous',
-                56: 'Media Set Time',
-                57: 'Toggle Streaming',
-                58: 'Start Streaming',
-                59: 'Stop Streaming',
-                60: 'Toggle Recording',
-                61: 'Start Recording',
-                62: 'Stop Recording',
-                63: 'Resume Recording',
-                64: 'Pause Recording',
-                23: 'Motion: Source Position',
-                67: 'Motion: Position Curve',
-                38: 'Motion: Source Scale',
-                39: 'Motion: Source Volume',
-                41: 'Motion: Source Rotation',
-                40: 'Motion: Alpha Filter',
-                42: 'Motion: Filter Settings',
-                145: 'Motion: Change Cropping',
-                65: 'Send OBS Request',
-                21: 'Change Studio Mode',
-                73: 'Trigger OBS Hotkey Name',
-                74: 'Trigger OBS Hotkey Sequence',
-                239: 'OBS Event Subscription',
-                148: 'Twitch: Send Chat Message',
-                315: 'Twitch: Add Blocked Term',
-                282: 'Twitch: Add Moderator',
-                284: 'Twitch: Add VIP',
-                268: 'Twitch: API Call',
-                273: 'Twitch: Ban User',
-                331: 'Twitch: Block User',
-                272: 'Twitch: Cancel Raid',
-                267: 'Twitch: Create API Header',
-                188: 'Twitch: Create Clip',
-                345: 'Twitch: Create EventSub Subscription',
-                179: 'Twitch: Create Marker',
-                180: 'Twitch: Create Poll',
-                240: 'Twitch: Create Prediction',
-                182: 'Twitch: Create Prediction 2 Outcomes',
-                229: 'Twitch: Create Reward',
-                263: 'Twitch: Delete Chat Message',
-                347: 'Twitch: Delete EventSub Subscription',
-                230: 'Twitch: Delete Reward',
-                265: 'Twitch: Edit All Rewards',
-                186: 'Twitch: Edit Reward',
-                181: 'Twitch: End Poll',
-                183: 'Twitch: End Prediction',
-                231: 'Twitch: Extra Edit Reward',
-                329: 'Twitch: Get Ad Schedule',
-                304: 'Twitch: Get AutoMod Settings',
-                314: 'Twitch: Get Blocked Terms',
-                276: 'Twitch: Get Banned Users',
-                312: 'Twitch: Get Channel Info',
-                280: 'Twitch: Get All Rewards Info',
-                340: 'Twitch; Get Channel Teams',
-                286: 'Twitch: Get Chat Settings',
-                270: 'Twitch: Get All Viewers Info',
-                105: 'Twitch: Get Connection Info',
-                281: 'Twitch: Get Channel Emotes',
-                178: 'Twitch: Get Follower Count',
-                173: 'Twitch: Get Game Info',
-                279: 'Twitch: Get Latest Followers',
-                184: 'Twitch: Get Latest Poll/Prediction ID',
-                277: 'Twitch: Get Moderators',
-                185: 'Twitch: Get Poll/Prediction Results',
-                338: 'Twitch: Get Random Viewer',
-                339: 'Twitch: Get Shared Chat Session',
-                175: 'Twitch: Get Stream Info',
-                310: 'Twitch: Get All Subscribers Info',
-                346: 'Twitch: Get Active EventSub Subscriptions',
-                177: 'Twitch: Get Subscriber Count',
-                341: 'Twitch: Get Team Information',
-                291: 'Twitch: Get User Color',
-                171: 'Twitch: Get User Info',
-                303: 'Twitch: Get User Status',
-                176: 'Twitch: Get User Subscription Info',
-                302: 'Twitch: Get Videos',
-                278: 'Twitch: Get VIPs',
-                150: 'Twitch: Join Channel',
-                151: 'Twitch: Leave Channel',
-                293: 'Twitch: Modify Channel Info',
-                316: 'Twitch: Remove Blocked Term',
-                283: 'Twitch: Remove Moderator',
-                285: 'Twitch: Remove VIP',
-                324: 'Twitch: Reply to Message',
-                266: 'Twitch: Run Ad (Commercial)',
-                241: 'Twitch: Send Announcement',
-                333: 'Twitch: Send API Chat Message',
-                254: 'Twitch: Send Whisper',
-                305: 'Twitch: Set AutoMod Settings',
-                290: 'Twitch: Set Emote Mode',
-                287: 'Twitch: Set Follower Mode',
-                269: 'Twitch: Set Shield Mode',
-                288: 'Twitch: Set Slow Mode',
-                289: 'Twitch: Set Subscriber Mode',
-                301: 'Twitch: Set Unique Chat Mode',
-                292: 'Twitch: Set User Color',
-                295: 'Twitch: Shoutout',
-                330: 'Twitch: Snooze Next Ad',
-                271: 'Twitch: Start Raid',
-                275: 'Twitch: Timeout User',
-                274: 'Twitch: Unban User',
-                332: 'Twitch: Unblock User',
-                187: 'Twitch: Update Redemption Status',
-                336: 'Twitch: Warn Chat User',
-                221: 'YouTube: Send Chat message',
-                222: 'YouTube: Change Status',
-                223: 'YouTube: Ban User',
-                224: 'YouTube: Unban User',
-                225: 'YouTube: User Subscription Status',
-                226: 'YouTube: Get Stats',
-                264: 'YouTube: Ad Break',
-                140: 'File: Copy File',
-                227: 'File: Delete File',
-                220: 'File: File Exists',
-                139: 'File: Get SHA1 Hash',
-                258: 'File: Random Line',
-                256: 'File: Read All',
-                257: 'File: Read Line',
-                255: 'File: Write Text',
-                124: 'INI: Save Number',
-                125: 'INI: Load Number',
-                126: 'INI: Save Text',
-                127: 'INI: Load Text',
-                128: 'INI: Delete Section',
-                129: 'INI: Delete Key',
-                130: 'INI: Section Exists',
-                131: 'INI: Key Exists',
-                251: 'INI: INI to Object',
-                250: 'INI: Object to INI',
-                198: 'CSV: Create',
-                211: 'CSV: Unload',
-                235: 'CSV: Exists',
-                245: 'CSV: Column Exists',
-                199: 'CSV: Add Column',
-                200: 'CSV: Add Row',
-                206: 'CSV: Get Box',
-                207: 'CSV: Set Box',
-                216: 'CSV: Get Size',
-                208: 'CSV: Column Find Value',
-                212: 'CSV: Row Find Value',
-                205: 'CSV: Sort',
-                204: 'CSV: Move Column',
-                203: 'CSV: Move Row',
-                210: 'CSV: Delete Column',
-                209: 'CSV: Delete Row',
-                201: 'CSV: Save',
-                202: 'CSV: Load',
-                246: 'CSV: Math',
-                108: 'Buffer: Create',
-                109: 'Buffer: Delete',
-                110: 'Buffer: Load',
-                111: 'Buffer: Save',
-                112: 'Buffer: Set Size',
-                113: 'Buffer: Get Size',
-                114: 'Buffer: Set Position',
-                115: 'Buffer: Get Position',
-                116: 'Buffer: Exists',
-                117: 'Buffer: Base64 Encode',
-                118: 'Buffer: Base64 Decode',
-                119: 'Buffer: Write',
-                120: 'Buffer: Read',
-                121: 'Buffer: Poke',
-                122: 'Buffer: peek',
-                123: 'Buffer: Hash SHA1',
-                298: 'Discord: Send Message',
-                319: 'Mix It Up: Get Commands',
-                320: 'Mix It Up: Run Command',
-                132: 'Trigger Button',
-                306: 'Command Line',
-                2: 'Play Sound Effect',
-                141: 'Popup Message',
-                300: 'Set Button Instance Variable',
-                134: 'Execute Program',
-                149: 'Twitch: Open Whispers',
-                5: 'Instruction',
-                197: 'Button Get Own ID',
-                299: 'File: Folder Exists',
-                133: 'Stop Button/Group',
-                193: 'Trigger Extension Triggers',
-                4: 'Warning Important',
-                50: 'Create Scene',
-                294: 'Reinitialize Default Variables',
-                327: 'Get Instance ID',
-                135: 'Command Line [DEPRECATED]',
-            };
+        const commandIdToHumanNameMap = {
+            "0": "Extension Commands",
+            "1": "OBS Custom Packet (DEPRECATED)",
+            "2": "Play Sound Effect",
+            "3": "Keyboard Simulate Press",
+            "4": "Comment (Warning Important)",
+            "5": "Comment (Instruction)",
+            "6": "Comment (Information)",
+            "7": "If Statement",
+            "8": "Re-enable",
+            "9": "Repeat",
+            "10": "Break",
+            "11": "Exit",
+            "12": "Set Local Variable",
+            "13": "Create Object",
+            "14": "Create Array",
+            "15": "Stringify Object",
+            "16": "Variable Transition",
+            "17": "Set String Variable",
+            "18": "Change Studio Mode",
+            "19": "Change Position",
+            "20": "Motion: Source Position",
+            "21": "Switch Statement",
+            "22": "Case Statement",
+            "23": "Modify Button/Group",
+            "24": "Filter Change Visibility",
+            "25": "Change Visibility",
+            "26": "Change Volume",
+            "27": "Change Scale",
+            "28": "Change Rotation",
+            "29": "Change Settings",
+            "30": "Source Change Text (GDI+)",
+            "31": "Source Change Text (FT2)",
+            "32": "Filter Change Settings",
+            "33": "Motion: Source Scale",
+            "34": "Motion: Source Volume",
+            "35": "Motion: Alpha Filter",
+            "36": "Motion: Source Rotation",
+            "37": "Motion: Filter Settings",
+            "38": "Switch Scene",
+            "39": "Mute",
+            "40": "Toggle Mute",
+            "41": "Change Audio Monitor Type",
+            "42": "Create Source",
+            "43": "Delete Source",
+            "44": "Duplicate Source (OBSws 4.9.1)",
+            "45": "Create Scene",
+            "46": "Media Resume/Pause",
+            "47": "Media Restart",
+            "48": "Media Stop",
+            "49": "Media Next",
+            "50": "Media Previous",
+            "51": "Media Set Time",
+            "52": "Toggle Streaming",
+            "53": "Start Streaming",
+            "54": "Stop Streaming",
+            "55": "Toggle Recording",
+            "56": "Start Recording",
+            "57": "Stop Recording",
+            "58": "Resume Recording",
+            "59": "Pause Recording",
+            "60": "Send OBS Request",
+            "61": "Trigger Pull Data",
+            "62": "Motion: Position Curve",
+            "63": "Change Scene Transition",
+            "64": "Remove Scene Transition",
+            "65": "Set Transition",
+            "66": "Set Transition Duration",
+            "67": "Set Transition Settings",
+            "68": "Trigger OBS Hotkey Name",
+            "69": "Trigger OBS Hotkey Sequence",
+            "70": "Change Center Point",
+            "71": "Clamp",
+            "72": "Random",
+            "73": "Delete Variable",
+            "74": "String to Number",
+            "75": "Hex String to Number",
+            "76": "Get Variable Type",
+            "77": "Set Boolean",
+            "78": "String Get Length",
+            "79": "String Digits Only",
+            "80": "String Letters Only",
+            "81": "String Letters & Digits Only",
+            "82": "String Replace",
+            "83": "String Replace All",
+            "84": "String Upper Case",
+            "85": "String Lower Case",
+            "86": "String Position",
+            "87": "String Count",
+            "88": "String Clamp",
+            "89": "String Remove Section",
+            "90": "Number to String",
+            "91": "Array Insert",
+            "92": "Array Remove",
+            "93": "Array Pull",
+            "94": "Array Replace",
+            "95": "Array Get Size ",
+            "96": "Array Random",
+            "97": "Array Shuffle",
+            "98": "Array Sort",
+            "99": "Array Concat",
+            "100": "Get Connection Info",
+            "101": "Set Clipboard",
+            "102": "Load Clipboard",
+            "103": "Buffer: Create",
+            "104": "Buffer: Delete",
+            "105": "Buffer: Load",
+            "106": "Buffer: Save",
+            "107": "Buffer: Set Size",
+            "108": "Buffer: Get Size",
+            "109": "Buffer: Set Position",
+            "110": "Buffer: Get Position",
+            "111": "Buffer: Exists ",
+            "112": "Buffer: Base64 Encode",
+            "113": "Buffer: Base64 Decode",
+            "114": "Buffer: Write",
+            "115": "Buffer: Read",
+            "116": "Buffer: Poke",
+            "117": "Buffer: Peek",
+            "118": "Buffer: Hash SHA1",
+            "119": "INI: Save Number",
+            "120": "INI: Load Number",
+            "121": "INI: Save Text",
+            "122": "INI: Load Text",
+            "123": "INI: Delete Section",
+            "124": "INI: Delete Key",
+            "125": "INI: Section Exists",
+            "126": "INI: Key Exists",
+            "127": "Trigger Button",
+            "128": "Stop Button/Group",
+            "129": "Execute Program",
+            "130": "Command Line (DEPRECATED)",
+            "131": "Open URL",
+            "132": "Overtime",
+            "133": "Get Date/Time",
+            "134": "File: Get SHA1 Hash",
+            "135": "File: Copy File",
+            "136": "Popup Message",
+            "137": "Alert Message",
+            "138": "Pull Source Value",
+            "139": "Change Cropping",
+            "140": "Motion: Change Cropping",
+            "141": "Stop Sound Effect",
+            "142": "Pull Wildcard",
+            "143": "Send Chat Message ",
+            "144": "Open Whispers",
+            "145": "Join Channel",
+            "146": "Leave Channel",
+            "147": "Check Keyboard Button Status",
+            "148": "Wait Until Variable Exists",
+            "149": "Mouse Change Position",
+            "150": "Mouse Simulate Click",
+            "151": "Wait Until Variable Is",
+            "152": "Wait For Keyboard Button Status",
+            "153": "Notification Message",
+            "154": "String Hash",
+            "155": "Set Button Variable",
+            "156": "Set Global Variable",
+            "157": "Get Button Variable",
+            "158": "Get Global Variable",
+            "159": "Get Object Variable",
+            "160": "Set Object Variable",
+            "161": "Array Find Value",
+            "162": "Stringify Array",
+            "163": "Parse Array/Object",
+            "164": "HTTP Request",
+            "165": "Swap Red & Blue",
+            "166": "Get User Info",
+            "167": "Change Stream Status (DEPRECATED)",
+            "168": "Get Game Info",
+            "169": "Get Channel Info (DEPRECATED)",
+            "170": "Get Stream Info",
+            "171": "Get User Subscription Info",
+            "172": "Get Subscriber Count",
+            "173": "Get Follower Count",
+            "174": "Create Marker",
+            "175": "Create Poll",
+            "176": "End Poll",
+            "177": "Create Prediction 2 Outcomes",
+            "178": "End Prediction",
+            "179": "Get Latest Poll/Prediction ID",
+            "180": "Get Poll/Prediction Result",
+            "181": "Edit Reward",
+            "182": "Update Redemption Status ",
+            "183": "Create Clip",
+            "184": "Block Button/Group",
+            "185": "Wait For Timeout",
+            "186": "Sound Effect Change Speed",
+            "187": "Sound Effect Change Volume",
+            "188": "Trigger Extension Triggers",
+            "189": "Object Get Size",
+            "190": "Object Get First Key",
+            "191": "Object Get Next Key",
+            "192": "Button Get Own ID",
+            "193": "CSV: Create",
+            "194": "CSV: Add Columns",
+            "195": "CSV: Add Row",
+            "196": "CSV: Save",
+            "197": "CSV: Load",
+            "198": "CSV: Move Row",
+            "199": "CSV: Move Column",
+            "200": "CSV: Sort",
+            "201": "CSV: Get Box",
+            "202": "CSV: Set Box",
+            "203": "CSV: Column Find Value",
+            "204": "CSV: Delete Row",
+            "205": "CSV: Delete Column",
+            "206": "CSV: Unload",
+            "207": "CSV: Row Find Value",
+            "208": "Wait For User Choice",
+            "209": "Wait For User Input",
+            "210": "String Format",
+            "211": "CSV: Get Size",
+            "212": "String Split to Array",
+            "213": "Array Format to String",
+            "214": "Modify Button/Group From Object",
+            "215": "File: File Exists",
+            "216": "Send Chat Message",
+            "217": "Change Status",
+            "218": "Ban User",
+            "219": "Unban User",
+            "220": "User Subscription Status",
+            "221": "Get Stats",
+            "222": "File: Delete File",
+            "223": "Send UDP Packet",
+            "224": "Create Reward",
+            "225": "Delete Reward",
+            "226": "Extra Edit Reward",
+            "227": "Duplicate Source (OBSws 5)",
+            "228": "Change Blend Mode",
+            "229": "Array Clear",
+            "230": "CSV: Exists",
+            "231": "Number to Hex String",
+            "232": "URL Encode String",
+            "233": "Event Subscription",
+            "234": "Create Prediction",
+            "235": "Send Announcement",
+            "236": "Array Map",
+            "237": "Array Filter",
+            "238": "Object to Array",
+            "239": "CSV: Column Exists",
+            "240": "CSV: Math",
+            "241": "Get Date/Time",
+            "242": "Date/Time Math",
+            "243": "Date/Time Diff",
+            "244": "INI: Object to INI",
+            "245": "INI: INI to Object",
+            "246": "String Trim",
+            "247": "Send Whisper",
+            "248": "File: Append Text",
+            "249": "File: Read All",
+            "250": "File: Read Line",
+            "251": "File: Random Line",
+            "252": "Array Get Value",
+            "253": "Event Pull",
+            "254": "Deck: Change Status",
+            "255": "Deck: Get Status",
+            "256": "Delete Chat Message",
+            "257": "Ad Break",
+            "258": "Edit All Rewards",
+            "259": "Run Ad (Commercial)",
+            "260": "Create API Header",
+            "261": "API Call",
+            "262": "Set Shield Mode",
+            "263": "Get All Viewers Info",
+            "264": "Start Raid",
+            "265": "Cancel Raid",
+            "266": "Ban User",
+            "267": "Unban User",
+            "268": "Timeout User",
+            "269": "Get Banned Users",
+            "270": "Get Moderators",
+            "271": "Get VIPs",
+            "272": "Get Latest Followers",
+            "273": "Get All Rewards Info",
+            "274": "Get Emotes",
+            "275": "Add Moderator",
+            "276": "Remove Moderator",
+            "277": "Add VIP",
+            "278": "Remove VIP",
+            "279": "Get Chat Settings",
+            "280": "Set Follower Mode",
+            "281": "Set Slow Mode",
+            "282": "Set Subscriber Mode",
+            "283": "Set Emote Mode",
+            "284": "Get User Color",
+            "285": "Set User Color",
+            "286": "Modify Channel Info",
+            "287": "Reinitialize Default Variables",
+            "288": "Shoutout User",
+            "289": "Toggle Visibility",
+            "290": "Filter Toggle Visibility",
+            "291": "Discord: Send Message",
+            "292": "File: Folder Exists",
+            "293": "Set Button Instance Variable",
+            "294": "Set Unique Chat",
+            "295": "Get Videos",
+            "296": "Get User Status",
+            "297": "Get Automod Settings",
+            "298": "Set Automod Settings",
+            "299": "Command Line",
+            "300": "Date/Time Duration",
+            "301": "Panel: Switch Deck",
+            "302": "HTTP Upload File",
+            "303": "Get All Subscribers Info",
+            "304": "String Capitalize",
+            "305": "Get Channel Info",
+            "306": "Voice: Toggle Status",
+            "307": "Get Blocked Terms",
+            "308": "Add Blocked Term",
+            "309": "Remove Blocked Term",
+            "310": "Send JSON to Extension",
+            "311": "String Substitute Variables",
+            "312": "Mix It Up: Get All Commands",
+            "313": "Mix It Up: Run Command",
+            "314": "Panel: Wait for Input",
+            "315": "Panel: Wait for Choice",
+            "316": "Panel: Wait for Multi Choice",
+            "317": "Reply to Message",
+            "318": "Get Button Colour",
+            "319": "Get Button Text",
+            "320": "Get Instance ID",
+            "321": "Deck App: Send JSON",
+            "322": "Get Ad Schedule",
+            "323": "Snooze Next Ad",
+            "324": "Block User",
+            "325": "Unblock User",
+            "326": "Send API Chat Message",
+            "327": "Set Hidden Variable",
+            "328": "Set Filepath Variable",
+            "329": "Warn Chat User",
+            "330": "Start Download [DEPRECATED]",
+            "331": "Get Random Viewer",
+            "332": "Get Shared Chat Session",
+            "333": "Get Channel Teams",
+            "334": "Get Team Info",
+            "335": "HTTP Download File",
+            "336": "Remap",
+            "337": "Lerp",
+            "338": "Create EventSub Subscription",
+            "339": "Get Active EventSub Subscriptions",
+            "340": "Delete EventSub Subscription"
+        };
 
-            const triggerIdToHumanNameMap = {
-                42: 'Gamepad',
-                7: 'Hotkey',
-                8: 'Repeat Interval',
-                9: 'OBS Trigger',
-                12: 'Extension Trigger',
-                10: 'SAMMI Trigger',
-                26: 'Webhook Trigger',
-                33: 'Twitch Ad Break',
-                35: 'Twitch Announcement',
-                40: 'Twitch Automatic Reward Redemption',
-                5: 'Twitch Bits',
-                47: 'Twitch Combo',
-                46: 'Twitch EventSub Status Changed',
-                41: 'Twitch Channel Information Updated',
-                3: 'Twitch Channel Point Redemption',
-                34: 'Twitch Charity',
-                45: 'Twitch Custom EventSub Subscription',
-                0: 'Twitch Chat Message',
-                36: 'Twitch Guest Star',
-                17: 'Twitch Hype Train',
-                11: 'Twitch Moderation',
-                6: 'Twitch New Follower',
-                16: 'Twitch Poll',
-                44: 'Twitch Power-ups',
-                15: 'Twitch Prediction',
-                4: 'Twitch Raid',
-                28: 'Twitch Shoutout - Created',
-                37: 'Twitch Shoutout - Received',
-                38: 'Twitch Stream',
-                1: 'Twitch Subscription',
-                2: 'Twitch Subscription - Community Gift',
-                43: 'Twitch Watch Streak',
-                13: 'Twitch Whisper',
-                18: 'YouTube Chat Message',
-                22: 'YouTube Members',
-                19: 'YouTube Subscriber',
-                20: 'YouTube Super Chat',
-                21: 'YouTube Super Sticker',
-                30: 'Crowd Control',
-                39: 'Elgato Stream Deck',
-                32: 'Pulsoid',
-                31: 'Voicemod',
-            };
+        const triggerIdToHumanNameMap = {
+            "0": "Twitch Chat",
+            "1": "Twitch Subscription",
+            "2": "Twitch Community Gift Subs",
+            "3": "Twitch Channel Points",
+            "4": "Twitch Raid",
+            "5": "Twitch Bits",
+            "6": "Twitch New Follower",
+            "7": "Hotkey",
+            "8": "Repeat Interval",
+            "9": "OBS Trigger",
+            "10": "SAMMI Trigger",
+            "11": "Twitch Moderation",
+            "12": "Extension Trigger",
+            "13": "Twitch Whispers",
+            "14": "Twitch Host [DEPRECATED]",
+            "15": "Twitch Prediction",
+            "16": "Twitch Poll",
+            "17": "Twitch Hype Train",
+            "18": "YouTube Chat",
+            "19": "YouTube Subscriber",
+            "20": "YouTube Super Chat",
+            "21": "YouTube Super Sticker",
+            "22": "YouTube Members",
+            "23": "SAMMI Deck",
+            "24": "Trigger Button",
+            "25": "Trigger Button with Delay",
+            "26": "Webhook Trigger",
+            "27": "Twitch Low Trust [DEPRECATED]",
+            "28": "Twitch Shoutout",
+            "29": "SAMMI Voice",
+            "30": "Crowd Control",
+            "31": "Voicemod",
+            "32": "Pulsoid",
+            "33": "Twitch Ad Break",
+            "34": "Twitch Charity",
+            "35": "Twitch Announcement",
+            "36": "Twitch Guest Star",
+            "37": "Twitch Shoutout - Received",
+            "38": "Twitch Stream",
+            "39": "Elgato Stream Deck",
+            "40": "Twitch Automatic Reward Redemption",
+            "41": "Twitch Channel Information Updated",
+            "42": "Gamepad",
+            "43": "Twitch Watch Streak",
+            "44": "Twitch Power-ups",
+            "45": "Twitch Custom EventSub Subscription",
+            "46": "Twitch EventSub Status Changed"
+        };
 
-            const combineData = (data1, data2) => {
-                const uniqueCommandNames = [... new Set([...data1.commands.map(c => c.name), ...data2.commands.map(c => c.name)])];
-                const uniqueTriggerNames = [... new Set([...data1.triggers.map(c => c.name), ...data2.triggers.map(c => c.name)])];
+        const combineData = (data1, data2) => {
+            const uniqueCommandNames = [...new Set([...data1.commands.map(c => c.name), ...data2.commands.map(c => c.name)])];
+            const uniqueTriggerNames = [...new Set([...data1.triggers.map(c => c.name), ...data2.triggers.map(c => c.name)])];
 
-                return {
-                    triggers: uniqueTriggerNames.map(name => {
-                        const matchingData1 = data1.triggers.find(c => c.name === name);
-                        const matchingData2 = data2.triggers.find(c => c.name === name);
-                        if(matchingData1 && !matchingData2) {
-                            return matchingData1;
-                        }
-                        if(matchingData2 && !matchingData1) {
-                            return matchingData2;
-                        }
-                        return {
-                            name,
-                            count: matchingData1.count + matchingData2.count,
-                        };
-                    }),
-                    commands: uniqueCommandNames.map(name => {
-                        const matchingData1 = data1.commands.find(c => c.name === name);
-                        const matchingData2 = data2.commands.find(c => c.name === name);
-                        if(matchingData1 && !matchingData2) {
-                            return matchingData1;
-                        }
-                        if(matchingData2 && !matchingData1) {
-                            return matchingData2;
-                        }
-                        return {
-                            name,
-                            count: matchingData1.count + matchingData2.count,
-                        };
-                    })
-                };
-            };
-
-            const parseButton = (button) => {
-                console.log(button);
-                const rawCommands = button.command_list;
-                const rawTriggers = button.triggers;
-
-                let processedCommands = [];
-                rawCommands.forEach(command => {
-                    const {cmd, dis, extcmd} = command;
-                    const isDisabled = dis !== 0;
-                    if(isDisabled) {
-                        return;
+            return {
+                triggers: uniqueTriggerNames.map(name => {
+                    const matchingData1 = data1.triggers.find(c => c.name === name);
+                    const matchingData2 = data2.triggers.find(c => c.name === name);
+                    if (matchingData1 && !matchingData2) {
+                        return matchingData1;
                     }
-                    let commandName = commandIdToHumanNameMap[cmd] || cmd;
-                    if(cmd === 0){
-                        commandName = `EXTENSION COMMAND: ${extcmd}`;
+                    if (matchingData2 && !matchingData1) {
+                        return matchingData2;
                     }
-                    const matchingProcessed = processedCommands.find(c => c.name === commandName);
-                    if(matchingProcessed) {
-                        matchingProcessed.count += 1;
-                        return;
-                    }
-                    processedCommands.push({
-                        name: commandName,
-                        count: 1,
-                    });
-                });
-
-                let processedTriggers = [];
-                rawTriggers.forEach(trigger => {
-                    const {trg} = trigger;
-                    const triggerName = triggerIdToHumanNameMap[trg] || trg;
-                    const matchingProcessed = processedTriggers.find(t => t.name === triggerName);
-                    if(matchingProcessed) {
-                        matchingProcessed.count += 1;
-                        return;
-                    }
-                    processedTriggers.push({
-                        name: triggerName,
-                        count: 1,
-                    });
-                });
-
-                return {
-                    triggers: processedTriggers,
-                    commands: processedCommands,
-                };
-            };
-
-            const parseDeck = (deckData) => {
-                const buttons = deckData.button_list;
-                // for some reason decks have an additional element that isn't a deck
-                if(!buttons){
                     return {
-                        commands: [],
-                        triggers: [],
+                        name,
+                        count: matchingData1.count + matchingData2.count,
                     };
+                }),
+                commands: uniqueCommandNames.map(name => {
+                    const matchingData1 = data1.commands.find(c => c.name === name);
+                    const matchingData2 = data2.commands.find(c => c.name === name);
+                    if (matchingData1 && !matchingData2) {
+                        return matchingData1;
+                    }
+                    if (matchingData2 && !matchingData1) {
+                        return matchingData2;
+                    }
+                    return {
+                        name,
+                        count: matchingData1.count + matchingData2.count,
+                    };
+                })
+            };
+        };
+
+        const parseButton = (button) => {
+            console.log(button);
+            const rawCommands = button.command_list;
+            const rawTriggers = button.triggers;
+
+            let processedCommands = [];
+            rawCommands.forEach(command => {
+                const {cmd, dis, extcmd} = command;
+                const isDisabled = dis !== 0;
+                if (isDisabled) {
+                    return;
                 }
-                const parsedButtons = buttons.map((button) => parseButton(button));
-                const combinedData = parsedButtons.reduce((acc, curr) => {
-                    return combineData(acc, curr)
+                let commandName = commandIdToHumanNameMap[`${cmd}`] || cmd;
+                if (cmd === 0) {
+                    commandName = `EXTENSION COMMAND: ${extcmd}`;
+                }
+                const matchingProcessed = processedCommands.find(c => c.name === commandName);
+                if (matchingProcessed) {
+                    matchingProcessed.count += 1;
+                    return;
+                }
+                processedCommands.push({
+                    name: commandName,
+                    count: 1,
+                });
+            });
+
+            let processedTriggers = [];
+            rawTriggers.forEach(trigger => {
+                const {trg} = trigger;
+                const triggerName = triggerIdToHumanNameMap[`${trg}`] || trg;
+                const matchingProcessed = processedTriggers.find(t => t.name === triggerName);
+                if (matchingProcessed) {
+                    matchingProcessed.count += 1;
+                    return;
+                }
+                processedTriggers.push({
+                    name: triggerName,
+                    count: 1,
+                });
+            });
+
+            return {
+                triggers: processedTriggers,
+                commands: processedCommands,
+            };
+        };
+
+        const parseDeck = (deckData) => {
+            const buttons = deckData.button_list;
+            // for some reason decks have an additional element that isn't a deck
+            if (!buttons) {
+                return {
+                    commands: [],
+                    triggers: [],
+                };
+            }
+            const parsedButtons = buttons.map((button) => parseButton(button));
+            const combinedData = parsedButtons.reduce((acc, curr) => {
+                return combineData(acc, curr)
+            }, {
+                commands: [],
+                triggers: [],
+            })
+            console.log(combinedData);
+            return combinedData;
+        };
+
+        const sortThing = (array) => {
+            return array.sort((a, b) => {
+                if (a.count > b.count) return -1;
+                if (a.count < b.count) return 1;
+                return b.name - a.name;
+            });
+        }
+
+
+        const generateStats = () => {
+            // try {
+            const inputData = JSON.parse(textArea.value);
+            let combinedData = {};
+            if (inputData.deck_data) {
+                // in this case it's a single deck.
+                combinedData = parseDeck(JSON.parse(inputData.deck_data));
+            } else {
+                combinedData = inputData.default.filter(d => d.on).reduce((acc, curr) => {
+                    return combineData(acc, parseDeck(curr));
                 }, {
                     commands: [],
                     triggers: [],
-                })
-                console.log(combinedData);
-                return combinedData;
-            };
-
-            const sortThing = (array) => {
-                return array.sort((a, b) => {
-                    if(a.count > b.count) return -1;
-                    if(a.count < b.count) return 1;
-                    return b.name - a.name;
                 });
             }
 
 
-            const generateStats = () => {
-                // try {
-                    const inputData = JSON.parse(textArea.value);
-                    let combinedData = {};
-                    if(inputData.deck_data){
-                        // in this case it's a single deck.
-                        combinedData = parseDeck(JSON.parse(inputData.deck_data));
-                    } else {
-                        combinedData = inputData.default.filter(d => d.on).reduce((acc, curr) => {
-                            return combineData(acc, parseDeck(curr));
-                        }, {
-                            commands: [],
-                            triggers: [],
-                        });
-                    }
-
-
-                    stats.innerHTML = `
+            stats.innerHTML = `
                         <div class="stats">
                             <div>
                                 <h2>Commands</h2>
@@ -568,13 +601,13 @@
                             </div>
                         </div>
                     `;
-                // } catch (e) {
-                //     stats.innerHTML = `Error parsing josn ${e.message}`;
-                // }
-            };
+            // } catch (e) {
+            //     stats.innerHTML = `Error parsing josn ${e.message}`;
+            // }
+        };
 
-            textArea.addEventListener('change', generateStats)
-        }());
-    </script>
+        textArea.addEventListener('change', generateStats)
+    }());
+</script>
 </body>
 </html>
